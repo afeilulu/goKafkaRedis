@@ -1,7 +1,8 @@
 package model
 
 type Alert struct {
-	Signature string `json:"signature"`
+	Signature    string `json:"signature"`
+	Signature_id int64 `json:"signature_id"`
 }
 
 type Http struct {

@@ -2,6 +2,7 @@ package operator
 
 import (
 	"encoding/json"
+	"strconv"
 
 	"afeilulu.com/goKafkaRedis/config"
 	"afeilulu.com/goKafkaRedis/model"
@@ -13,13 +14,13 @@ func Handle(msgBytes []byte) {
 	json.Unmarshal(msgBytes, &msgObj)
 
 	if len(msgObj.Http.Http_user_agent) > 0 {
+		key := msgObj.Alert.Signature + " " + strconv.FormatInt(msgObj.Alert.Signature_id,10)
 		// count signature by ip through hyperloglog
-		config.RedisClient.PFAdd(msgObj.Alert.Signature, msgObj.Src_ip)
+		config.RedisClient.PFAdd(key, msgObj.Src_ip)
 
-		config.RedisClient.PFCount(msgObj.Alert.Signature).Val()
 		z := new(redis.Z)
-		z.Score = float64(config.RedisClient.PFCount(msgObj.Alert.Signature).Val())
-		z.Member = msgObj.Alert.Signature
+		z.Score = float64(config.RedisClient.PFCount(key).Val())
+		z.Member = key
 		config.RedisClient.ZAdd("signature", *z)
 	}
 }
